@@ -1,0 +1,19 @@
+{
+  "description": "Show the Git workflow before Git-related tools and require the project wrapper.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c 'from pathlib import Path; import runpy; p=Path.cwd().resolve(); r=next((x for x in (p,*p.parents) if (x/\".car-git-workflow\").is_file()),None); r is not None or (_ for _ in ()).throw(RuntimeError(\"Git workflow root not found\")); runpy.run_path(str(r/\".codex/hooks/git-policy.py\"),run_name=\"__main__\")'",
+            "timeout": 10,
+            "additionalContextLimit": 0,
+            "statusMessage": "Git 작업 규칙 확인"
+          }
+        ]
+      }
+    ]
+  }
+}

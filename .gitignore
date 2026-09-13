@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+
+# Local environment and generated verification output
+.env
+.env.*
+!.env.example
+artifacts/*.png
+artifacts/*.jpg
+artifacts/*.json
+artifacts/*.html

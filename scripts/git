@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+car_repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ ! -s "$car_repo_root/GIT_WORKFLOW.md" ]; then
+  echo 'Git 중단: GIT_WORKFLOW.md를 읽을 수 없습니다.' >&2
+  exit 1
+fi
+cat "$car_repo_root/GIT_WORKFLOW.md" >&2
+exec git "$@"
