@@ -8,7 +8,7 @@ import {ASSEMBLY_VERSION,inspectAssembly,validPlacements,ISSUE_LABELS} from './a
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const system=new URLSearchParams(location.search).get('system')==='suspension'?'suspension':'engine';
 const lab=ASSEMBLY_LABS[system],KEY=lab.key,host=$('#canvas');
-document.title=`AUTO ATLAS · ${lab.name} 조립 실습`;
+document.title=`Eunduk Car Mechanics · ${lab.name} 조립 실습`;
 $('h1').textContent=`${lab.name} 조립 실습`;
 $('#lab-label').textContent=lab.label;
 $('#learning-link').href=`/mechanics.html?system=${system}`;

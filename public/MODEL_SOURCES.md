@@ -1,4 +1,4 @@
-# AUTO ATLAS — model sources and fidelity
+# Eunduk Car Mechanics — model sources and fidelity
 
 Research and integration date: 2026-09-13.
 
