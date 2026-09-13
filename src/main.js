@@ -1,3 +1,4 @@
+import {installQuestions} from './questions.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
@@ -83,3 +84,5 @@ let last=0;const screenPoint=new THREE.Vector3();function animate(time){requestA
  controls.update();renderer.render(scene,camera);
  if(ready){const show=$('#label-toggle').checked,occupied=[];const sorted=[...data].sort((a,b)=>(b.id===selected)-(a.id===selected));for(const d of sorted){const label=labels[d.id],g=groups[d.id];label.hidden=true;if(!show||!g.visible)continue;screenPoint.copy(localCenters[d.id]);g.localToWorld(screenPoint);screenPoint.project(camera);if(Math.abs(screenPoint.x)>.96||Math.abs(screenPoint.y)>.94||screenPoint.z>1)continue;const x=(screenPoint.x*.5+.5)*host.clientWidth,y=(-screenPoint.y*.5+.5)*host.clientHeight;if(y<135||occupied.some(p=>Math.abs(p.x-x)<104&&Math.abs(p.y-y)<22))continue;occupied.push({x,y});label.hidden=false;label.classList.toggle('chosen',d.id===selected);label.style.left=x+'px';label.style.top=y+'px';}}
 }requestAnimationFrame(animate);load();
+
+installQuestions({context:()=>{const options=data.map(d=>({system:'car',kind:'part',id:d.id,name:d.name}));return {refs:options.filter(r=>r.id===selected),options};}});

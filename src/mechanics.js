@@ -1,3 +1,4 @@
+import {installQuestions} from './questions.js';
 import {CURRICULUM} from './systems-curriculum.js';
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -101,3 +102,10 @@ function prepareSystemLesson(ids){clearBatchSelection();target=amount=0;solo=nul
 const requested=new URLSearchParams(location.search).get('system');load(['bay','engine','suspension','drivetrain'].includes(requested)?requested:'bay');requestAnimationFrame(frame);
 
 if(initialPart){const p=parts.find(p=>p.userData.id===initialPart);if(p){select(p);fit(p);}}
+installQuestions({context:()=>{
+ const partRefs=parts.map(p=>({system,kind:'part',id:p.userData.id,name:p.userData.name}));
+ const lessons=system==='engine'?LESSONS:(CURRICULUM[system]||[]);
+ const lessonRefs=lessons.map((l,i)=>({system,kind:'lesson',id:system==='engine'?String(i):l.id,name:l.title}));
+ const lab=systemLab?.getState(),lesson=learning?lessonRefs[lessonIndex]:lab?.active?lessonRefs[lab.index]:null;
+ return {refs:[...(selected?[partRefs.find(p=>p.id===selected.userData.id)]:[]),...(lesson?[lesson]:[])],options:[...lessonRefs,...partRefs]};
+}});
