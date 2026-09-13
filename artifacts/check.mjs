@@ -2,6 +2,7 @@ import {chromium} from '@playwright/test';
 import fs from 'node:fs';
 const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--no-sandbox']});
 const page=await browser.newPage({viewport:{width:1500,height:1000},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+if(process.argv.includes('--suspension-assembly-only')){await(await import('./suspension-assembly-check.mjs')).checkSuspensionAssembly(page);console.log(JSON.stringify({errors,suspensionAssembly:'passed'}));await browser.close();process.exit(errors.length?1:0);}
 if(process.argv.includes('--assembly-hints-only')){await(await import('./assembly-hints-check.mjs')).checkHints(page);console.log(JSON.stringify({errors,hints:'passed'}));await browser.close();process.exit(errors.length?1:0);}
 if(process.argv.includes('--assembly-only')){await(await import('./assembly-check.mjs')).checkAssembly(page);console.log(JSON.stringify({errors,assembly:'passed'}));await browser.close();process.exit(errors.length?1:0);}
 if(process.argv.includes('--questions-only')){await(await import('./questions-check.mjs')).checkQuestions(page);console.log(JSON.stringify({errors,questions:'passed'}));await browser.close();process.exit(errors.length?1:0);}
