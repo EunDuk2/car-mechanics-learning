@@ -1,11 +1,13 @@
 import './questions.css';
-const KEY='auto-atlas.questions.v1';
+const KEY='auto-atlas.questions.v1',REMOTE='/api/questions';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=s=>new Date(s).toLocaleString('ko-KR',{dateStyle:'medium',timeStyle:'short'});
 const uid=()=>crypto.randomUUID();
 export function installQuestions({context}){
- let records=[],storageError=false,active=null,editing=null,refs=[],tags=[],draftContext=null;
+ let records=[],storageError=false,remoteError=false,active=null,editing=null,refs=[],tags=[],draftContext=null;
  function read(){try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(value)||value.some(q=>!q.id||typeof q.title!=='string'||!Array.isArray(q.answers)||!Array.isArray(q.refs)||!Array.isArray(q.tags)))throw Error();records=value;storageError=false;}catch{storageError=true;}}
+ async function readProject(){try{const response=await fetch(REMOTE);if(!response.ok)throw Error();const value=await response.json();if(!Array.isArray(value))throw Error();if(!value.length&&records.length){await writeProject(records);}else{records=value;localStorage.setItem(KEY,JSON.stringify(records));}remoteError=false;}catch{remoteError=true;}}
+ async function writeProject(value){const response=await fetch(REMOTE,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)});if(!response.ok)throw Error();}
  read();
  const trigger=document.createElement('button');trigger.id='qa-open';trigger.textContent='질문 · 답변';document.querySelector('header').append(trigger);
  const dialog=document.createElement('dialog');dialog.id='qa-board';dialog.setAttribute('aria-labelledby','qa-heading');dialog.innerHTML=`
@@ -16,10 +18,10 @@ export function installQuestions({context}){
  <div class="qa-layout"><div class="qa-library"><label>질문·답변 검색<input id="qa-search" type="search" placeholder="제목, 질문, 답변, 태그"></label><div class="qa-filters"><label>답변 상태<select id="qa-status"><option value="">모든 상태</option><option value="waiting">답변 대기</option><option value="answered">답변 있음</option><option value="resolved">해결됨</option></select></label><label>연결·태그<select id="qa-tag"><option value="">모든 연결·태그</option></select></label></div><label class="qa-check"><input id="qa-current" type="checkbox">현재 부품 / 학습 관련 질문만</label><div id="qa-list"></div></div>
  <div class="qa-work"><div id="qa-empty"><span class="qa-kicker">ASK · CONNECT · REMEMBER</span><h3>궁금한 점을 남겨보세요.</h3><p>“점화플러그는 언제 불꽃을 만드나요?”<br>부품과 작동 원리를 함께 연결해 두면<br>다음 학습에서 쉽게 다시 찾을 수 있습니다.</p></div>
  <form id="qa-compose" hidden><h3 id="qa-compose-heading">새 질문</h3><label>질문 제목<input id="qa-title" required maxlength="160" placeholder="무엇이 궁금한가요?"></label><label>질문 내용<textarea id="qa-body" required maxlength="12000" rows="5" placeholder="이해한 내용과 헷갈리는 부분을 적어주세요."></textarea></label><div class="qa-field-title">관련 부품 · 학습 항목</div><p class="qa-hint">현재 화면의 연결을 자동으로 담았습니다. 필요 없는 연결은 ×로 빼고, 다른 부품도 추가할 수 있습니다.</p><div id="qa-refs" class="qa-chips"></div><label>연결 추가<select id="qa-add-ref"><option value="">부품 또는 학습 항목 선택</option></select></label><label>내 태그 <span class="qa-hint">쉼표로 구분 · 최대 12개</span><input id="qa-tags" maxlength="400" placeholder="점화 시점, 연소, 다시 공부"></label><div class="qa-actions"><button type="submit" class="qa-primary">질문 저장</button><button id="qa-cancel" type="button">작성 닫기</button></div></form>
- <div id="qa-thread" hidden></div></div></div><div class="qa-footer">이 브라우저에 저장됩니다. 다른 기기와 공유되지 않으며, 브라우저 데이터를 삭제하면 기록도 삭제됩니다. 중요한 기록은 내보내기로 보관하세요.</div>`;
+ <div id="qa-thread" hidden></div></div></div><div class="qa-footer">프로젝트의 <code>data/questions.json</code>에 저장됩니다. 서버를 실행한 환경에서 질문과 답변을 함께 관리하며, 브라우저 기록은 이전 데이터 마이그레이션과 임시 백업에만 사용합니다.</div>`;
  document.body.append(dialog);const $=s=>dialog.querySelector(s);
  function message(s){$('#qa-message').textContent=s;}
- function persist(next){if(storageError){message('기존 저장 기록을 읽을 수 없어 덮어쓰지 않았습니다. 먼저 기록을 내보내 보관해주세요.');return false;}try{localStorage.setItem(KEY,JSON.stringify(next));records=next;message('저장했습니다.');return true;}catch{message('저장 공간이 부족하거나 브라우저 저장이 차단되었습니다. 작성 내용은 유지됩니다.');return false;}}
+ function persist(next){if(storageError){message('기존 저장 기록을 읽을 수 없어 덮어쓰지 않았습니다. 먼저 기록을 내보내 보관해주세요.');return false;}try{localStorage.setItem(KEY,JSON.stringify(next));records=next;writeProject(next).then(()=>{remoteError=false;message('프로젝트 JSON에 저장했습니다.');}).catch(()=>{remoteError=true;message('브라우저에는 저장했지만 프로젝트 JSON 저장에 실패했습니다. 서버 상태를 확인해주세요.');});message('저장 중…');return true;}catch{message('저장 공간이 부족하거나 브라우저 저장이 차단되었습니다. 작성 내용은 유지됩니다.');return false;}}
  const refKey=r=>`${r.system}:${r.kind}:${r.id}`;
  const qKeys=q=>[...q.refs.map(r=>'ref:'+refKey(r)),...q.tags.map(t=>'tag:'+t)];
  function renderFilters(){const old=$('#qa-tag').value,map=new Map();for(const q of records){q.refs.forEach(r=>map.set('ref:'+refKey(r),`${r.kind==='part'?'부품':r.kind==='lesson'?'학습':'구성'} · ${r.name}`));q.tags.forEach(t=>map.set('tag:'+t,'# '+t));}$('#qa-tag').innerHTML='<option value="">모든 연결·태그</option>'+[...map].sort((a,b)=>a[1].localeCompare(b[1],'ko')).map(([k,v])=>`<option value="${escape(k)}">${escape(v)}</option>`).join('');if(map.has(old))$('#qa-tag').value=old;}
@@ -34,7 +36,8 @@ export function installQuestions({context}){
  $('#qa-compose').onsubmit=e=>{e.preventDefault();const title=$('#qa-title').value.trim(),body=$('#qa-body').value.trim();if(!title||!body)return;tags=[...new Set($('#qa-tags').value.split(/[,，]/).map(t=>t.trim().replace(/^#+/,'')).filter(Boolean))];if(tags.length>12||tags.some(t=>t.length>40)){message('태그는 12개까지, 하나당 40자 이하로 입력해주세요.');return;}const now=new Date().toISOString(),old=records.find(q=>q.id===editing),q={id:old?.id||uid(),created:old?.created||now,updated:now,title,body,refs:structuredClone(refs),tags,answers:old?.answers||[],resolved:old?.resolved||false};if(persist(old?records.map(r=>r.id===q.id?q:r):[...records,q])){editing=null;renderFilters();showThread(q.id);}};
  $('#qa-cancel').onclick=()=>{if(active)showThread(active);else{$('#qa-compose').hidden=true;$('#qa-empty').hidden=false;}};
  $('#qa-new').onclick=()=>{if(!$('#qa-compose').hidden){$('#qa-title').focus();message('작성 중인 질문이 있습니다. 저장하거나 작성 닫기를 눌러주세요.');return;}compose();};
- trigger.onclick=()=>{read();renderFilters();renderList();message(storageError?'저장 기록을 읽을 수 없습니다. 내보내기로 원본을 보관할 수 있습니다.':'');dialog.showModal();};$('#qa-close').onclick=()=>dialog.close();for(const id of ['#qa-search','#qa-status','#qa-tag','#qa-current'])$(id).addEventListener('input',renderList);
+ trigger.onclick=()=>{read();renderFilters();renderList();message(storageError?'저장 기록을 읽을 수 없습니다. 내보내기로 원본을 보관할 수 있습니다.':remoteError?'프로젝트 JSON에 연결할 수 없습니다. 서버 상태를 확인해주세요.':'');dialog.showModal();};$('#qa-close').onclick=()=>dialog.close();for(const id of ['#qa-search','#qa-status','#qa-tag','#qa-current'])$(id).addEventListener('input',renderList);
  $('#qa-export').onclick=()=>{const blob=new Blob([storageError?(localStorage.getItem(KEY)||''):JSON.stringify({version:1,exported:new Date().toISOString(),questions:records},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='auto-atlas-questions-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  window.addEventListener('storage',e=>{if(e.key===KEY){read();renderFilters();renderList();if(active&&$('#qa-compose').hidden){if(records.some(q=>q.id===active))showThread(active);else{active=null;$('#qa-thread').hidden=true;$('#qa-empty').hidden=false;}}}});
+ readProject().then(()=>{renderFilters();renderList();if(active&&records.some(q=>q.id===active))showThread(active);});
 }
