@@ -24,6 +24,7 @@ const snapshots={};
 const initialPart=new URLSearchParams(location.search).get('part');
 const descriptions={drivetrain:{title:'동력 전달 · 조향',intro:'클러치 · 기어 · 차동 · 구동축 · 랙',scope:'일반 단판 클러치·한 쌍의 외접 기어·오픈 차동기어·평면 랙 조향을 기능별로 펼친 참고 모델입니다. 실제 아반떼의 6MT/8DCT 내부·e-LSD·EPS 제어·타이어 미끄럼을 재현하지 않았습니다.'},bay:{title:'엔진룸 전체 구성',intro:'가로배치 2.0 터보 · 계통별 구조 참고',scope:'엔진룸의 주요 장치·대표 배관을 재구성했습니다. 현대 공식 자료의 2.0 터보 구성과 부품 제조사의 기능 설명을 참고했으며, 실제 CN7 장착 좌표·배관 경로·BOM은 검증하지 않았습니다. 모든 볼트·클립·씰·배선, 실내/연료탱크 계통과 변속기 내부는 미포함입니다.'},engine:{title:'직렬 4기통 엔진',intro:'DOHC · 16밸브 구조 참고 모델',scope:'블록·크랭크·피스톤·밸브·타이밍 구성에 집중했습니다. 작동 모드는 로드 길이와 크랭크/캠 2:1 관계를 유지하는 학습용 기구 운동입니다. 실제 치수·점화 진각·밸브 겹침·가변 타이밍·태핏 접촉·압력/토크 계산은 생략했습니다. 실제 엔진 RPM이나 제조사 동작 해석이 아닙니다.'},suspension:{title:'전륜 맥퍼슨 구조',intro:'스트럿 · 허브 · 조향 링크 · 제동계',scope:'한쪽 전륜의 연결 관계를 재구성했습니다. 댐퍼 내부는 일반적인 트윈 튜브 참고 구조이며 아반떼 N ECS 설계가 아닙니다. 차체 체결 좌표·전자제어 밸브·후륜 서스펜션은 재현하지 않았습니다.'}};
 function load(name,lessonRequest=null){
+ const assemblyLink=$('.assembly-entry');assemblyLink.href=name==='suspension'?'/assembly.html?system=suspension':'/assembly.html';assemblyLink.textContent=name==='suspension'?'전륜·제동 조립 실습 ↗':'엔진 조립 실습 ↗';
  clearBatchSelection();
  const initialLesson=new URLSearchParams(location.search).get('lesson');
  if(learning)stopLearning();systemLab?.stop();systemLab=null;engineMotion=null;

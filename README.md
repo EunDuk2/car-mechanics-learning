@@ -119,6 +119,16 @@ node artifacts/check.mjs
 
 추가 검증: `node artifacts/check.mjs --assembly-hints-only` — 기본 정답 비노출, 부품 선택 후 비노출, 개별 힌트 범위·자동 자리 선택 없음, 힌트 해제 후 이력 보존, 재진입 기본 숨김, 새 실습 기록 초기화, 모바일 렌더링.
 
+### 전륜·제동 조립 실습
+
+`/assembly.html?system=suspension`에서 기존 한쪽 전륜 맥퍼슨 모델의 **29개 부품 그룹**을 조립합니다. 스트럿·댐퍼 내부·너클·허브·디스크·캘리퍼·패드·하부 링크·구동축을 포함합니다. 차량 화면, 전륜 학습 상단 또는 조립 실습의 **전륜·제동** 탭으로 이동합니다.
+
+엔진 실습과 같은 드래그·번호 자리 선택·회전·실행 취소·요청형 힌트·검사·메모·재도전·내보내기를 제공합니다. 부품 복습은 해당 전륜 부품의 학습 화면으로 연결됩니다. 간격 0%에서 조립 형상을 확인할 수 있습니다. 검사 기준은 부품별 자리와 기준 방향이며 실제 정비 순서·토크·스프링 압축·유압·얼라인먼트를 판정하지 않습니다.
+
+진행 상태와 검사 기록은 `auto-atlas.suspension-assembly.v1`에 별도 저장합니다. 기존 `/assembly.html`과 엔진의 `auto-atlas.engine-assembly.v1` 기록은 그대로 유지됩니다.
+
+검증: `node artifacts/check.mjs --suspension-assembly-only` — 29개 전체 배치·원본 좌표, 드래그·이동, 오배치·중복·회전·누락 검사, 힌트, 기록 복원·재도전·내보내기, 엔진 기록 분리, 복습 연결, 모바일 레이아웃.
+
 ### Git 작업 규칙
 
 브랜치·커밋·PR·GitHub 연결 및 훅 사용 방법은 [GIT_WORKFLOW.md](GIT_WORKFLOW.md)를 따릅니다. Git 명령은 `./scripts/git` 또는 `npm run git --`로 실행하면 규칙 전문이 먼저 표시됩니다. 새 clone 후 `npm ci`로 훅이 연결되며, 수동 설정은 `npm run setup:git`입니다. Codex 사전 훅은 새 프로젝트 세션에서 `/hooks` 신뢰 검토 후 활성화됩니다.
