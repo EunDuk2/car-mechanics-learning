@@ -10,3 +10,7 @@ artifacts/*.png
 artifacts/*.jpg
 artifacts/*.json
 artifacts/*.html
+
+# Downloaded research caches and generated model inspection reports
+artifacts/research/*
+!artifacts/research/.gitkeep
