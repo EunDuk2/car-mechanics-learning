@@ -14,3 +14,4 @@ artifacts/*.html
 # Downloaded research caches and generated model inspection reports
 artifacts/research/*
 !artifacts/research/.gitkeep
+.vercel
